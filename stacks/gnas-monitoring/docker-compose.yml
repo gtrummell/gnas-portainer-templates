@@ -1,0 +1,124 @@
+version: '3'
+
+services:
+  alertmanager:
+    container_name: alertmanager
+    image: prom/alertmanager:latest
+    restart: on-failure
+    labels:
+      - traefik.enable=false
+    ports:
+      - 9093:9093
+    volumes:
+      - /opt/gnas/prom/alertmanager.yml:/etc/prometheus/alertmanager.yml
+      - /opt/gnas/prom/alertmanager:/alertmanager
+
+  blackbox_exporter:
+    container_name: blackbox_exporter
+    image: prom/blackbox-exporter:latest
+    restart: on-failure
+    labels:
+      - traefik.enable=false
+    ports:
+      - 9115:9115
+    volumes:
+      - /opt/gnas/prom/blackbox_exporter.yml:/etc/blackbox_exporter/config.yml
+
+  cadvisor:
+    container_name: cadvisor
+    image: google/cadvisor:latest
+    restart: on-failure
+    environment:
+      - PUID=65534
+      - PGID=65534
+      - TZ='America/Los Angeles'
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.cadvisor.rule=Host(`cadvisor`, `cadvisor.freedomring.net`)
+      - traefik.http.services.cadvisor.loadbalancer.server.port=8080
+      - traefik.http.routers.cadvisor.entrypoints=http,https
+    ports:
+      - 8080:8080
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:latest
+    restart: on-failure
+    environment:
+      - PUID=65534
+      - PGID=65534
+      - TZ='America/Los Angeles'
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.grafana.rule=Host(`grafana`, `grafana.freedomring.net`)
+      - traefik.http.services.grafana.loadbalancer.server.port=3000
+      - traefik.http.routers.grafana.entrypoints=http,https
+    ports:
+      - 3000:3000
+    volumes:
+      - /opt/gnas/grafana/grafana.ini:/etc/grafana/grafana.ini
+      - /opt/gnas/grafana/lib:/var/lib/grafana
+      - /opt/gnas/grafana/log:/var/log/grafana
+
+  prom:
+    container_name: prom
+    command: --storage.tsdb.retention.size=15GB
+    dns: 192.168.151.1
+    dns_search: freedomring.net.
+    image: prom/prometheus:latest
+    restart: on-failure
+    environment:
+      - PUID=65534
+      - PGID=65534
+      - TZ='America/Los Angeles'
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.prom.rule=Host(`prom`, `prom.freedomring.net`)
+      - traefik.http.services.prom.loadbalancer.server.port=3000
+      - traefik.http.routers.prom.entrypoints=http,https
+    ports:
+      - 9090:9090
+    volumes:
+      - /opt/gnas/prom/prometheus.yml:/prometheus/prometheus.yml
+      - /opt/gnas/prom/rules:/etc/prometheus/rules
+      - /opt/gnas/prom/prometheus:/prometheus/data
+
+  pushgateway:
+    container_name: pushgateway
+    image: prom/pushgateway:latest
+    restart: on-failure
+    labels:
+      - traefik.enable=false
+    ports:
+      - 9091:9091
+    volumes:
+      - /opt/gnas/prom/pushgateway:/pushgateway
+
+  sabnzbd_exporter:
+    container_name: sabnzbd_exporter
+    image: msroest/sabnzbd_exporter:latest
+    restart: on-failure
+    environment:
+      - SABNZBD_BASEURL=http://192.168.151.51:8088
+      - SABNZBD_APIKEY=9b75d42acd1d18457222065e1215def7
+    labels:
+      - traefik.enable=false
+    ports:
+      - 9387:9387/tcp
+
+  transmission_exporter:
+    container_name: transmission_exporter
+    image: metalmatze/transmission-exporter:latest
+    restart: on-failure
+    environment:
+      - TRANSMISSION_ADDR=http://192.168.151.51:8901
+    labels:
+      - traefik.enable=false
+    ports:
+      - 19091:19091/tcp

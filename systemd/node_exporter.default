@@ -1,2 +1,2 @@
-# /etc/defaults file for the Prometheus Node Exporter
+# Defaults file for the Prometheus Node Exporter
 OPTIONS="--collector.tcpstat --collector.textfile.directory /var/lib/node_exporter/textfile_collector"

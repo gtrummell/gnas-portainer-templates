@@ -4,7 +4,7 @@
 # Self-documenting Makefile based on code written by [François Zaninotto](http://bit.ly/2PYuVj1)
 
 help:
-	@echo "Make targets for GNAS Prometheus Monitoring Docker-Compose Stack"
+	@echo "Make targets for GNAS 415 Custom Portainer/Docker-Compose Stack"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 clean: ## Sanitize the workspace by removing containers

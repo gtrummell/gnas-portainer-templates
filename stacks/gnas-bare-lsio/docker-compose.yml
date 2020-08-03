@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+  portainer:
+    container_name: portainer
+    image: portainer/portainer:latest
+    restart: on-failure
+    environment:
+      - PGID=65534
+      - PUID=65534
+      - TZ='America/Los Angeles'
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.portainer.rule=Host(`portainer`, `portainer.freedomring.net`)
+      - traefik.http.services.portainer.loadbalancer.server.port=9000
+      - traefik.http.routers.portainer.entrypoints=http,https
+    ports:
+      - 8000:8000
+      - 9000:9000
+    volumes:
+      - /etc/portainer:/etc/portainer
+      - /var/lib/portainer:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    command:
+      - "--templates='https://raw.githubusercontent.com/gtrummell/gnas-portainer-templates/master/templates.json'"
+
+  traefik:
+    container_name: traefik
+    image: traefik:2.3
+    restart: on-failure
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8181:8181"
+      - "9351:9351"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/gnas/traefik:/etc/traefik

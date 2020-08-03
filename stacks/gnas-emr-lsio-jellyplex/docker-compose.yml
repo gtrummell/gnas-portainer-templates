@@ -1,0 +1,252 @@
+version: '3'
+
+services:
+  bazarr:
+    container_name: bazarr
+    image: linuxserver/bazarr:latest
+    restart: on-failure
+    environment:
+      - PGID=65534
+      - PUID=65534
+      - TZ='America/Los Angeles'
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.bazarr.rule=Host(`bazarr`, `bazarr.freedomring.net`)
+      - traefik.http.services.bazarr.loadbalancer.server.port=6767
+      - traefik.http.routers.bazarr.entrypoints=http,https
+    ports:
+      - 6767:6767
+    volumes:
+      - /opt/gnas/bazarr:/config
+      - /storage/Movies:/movies
+      - /storage/TV:/tv
+
+  hydra2:
+    container_name: hydra2
+    image: linuxserver/hydra2:latest
+    restart: on-failure
+    environment:
+      - PGID=65534
+      - PUID=65534
+      - TZ='America/Los Angeles'
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.hydra2.rule=Host(`hydra2`, `hydra2.freedomring.net`)
+      - traefik.http.services.hydra2.loadbalancer.server.port=5076
+      - traefik.http.routers.hydra2.entrypoints=http,https
+    ports:
+      - 5076:5076/tcp
+    volumes:
+      - /opt/gnas/hydra2:/config
+      - /storage/Downloads/complete:/downloads
+      - /storage/Downloads/watched/torrent:/watch
+
+  jackett:
+    container_name: jackett
+    image: linuxserver/jackett:latest
+    restart: on-failure
+    environment:
+      - PGID=65534
+      - PUID=65534
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.jackett.rule=Host(`jackett`, `jackett.freedomring.net`)
+      - traefik.http.services.jackett.loadbalancer.server.port=9117
+      - traefik.http.routers.jackett.entrypoints=http,https
+    ports:
+      - 9117:9117/tcp
+    volumes:
+      - /opt/gnas/jackett:/config
+      - /storage/Downloads/complete:/downloads
+      - /storage/Downloads/watched/torrent:/watch
+
+  jellyfin:
+    container_name: jellyfin
+    image: linuxserver/jellyfin
+    restart: on-failure
+    environment:
+      - PGID=65534
+      - PUID=65534
+      - TZ='America/Los Angeles'
+    volumes:
+      - /opt/gnas/jellyfin:/config
+      - /path/to/tvseries:/data/tvshows
+      - /path/to/movies:/data/movies
+      - /opt/vc/lib:/opt/vc/lib
+      - /storage/Movies:/data/movies
+      - /storage/TV:/data/tvshows
+      - /storage/Music:/data/music
+    ports:
+      - 8096:8096
+      - 8920:8920
+
+  lidarr:
+    container_name: lidarr
+    image: linuxserver/lidarr:latest
+    restart: on-failure
+    environment:
+      - PGID=65534
+      - PUID=65534
+      - TZ='America/Los Angeles'
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.lidarr.rule=Host(`lidarr`, `lidarr.freedomring.net`)
+      - traefik.http.services.lidarr.loadbalancer.server.port=8686
+      - traefik.http.routers.lidarr.entrypoints=http,https
+    ports:
+      - 8686:8686/tcp
+    volumes:
+      - /opt/gnas/lidarr:/config
+      - /storage/Downloads/complete/audio:/downloads
+      - /storage/Audio:/music
+
+  portainer:
+    container_name: portainer
+    image: portainer/portainer:latest
+    restart: on-failure
+    environment:
+      - PGID=65534
+      - PUID=65534
+      - TZ='America/Los Angeles'
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.portainer.rule=Host(`portainer`, `portainer.freedomring.net`)
+      - traefik.http.services.portainer.loadbalancer.server.port=9000
+      - traefik.http.routers.portainer.entrypoints=http,https
+    ports:
+      - 8000:8000
+      - 9000:9000
+    volumes:
+      - /etc/portainer:/etc/portainer
+      - /var/lib/portainer:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    command:
+      - "--templates='https://raw.githubusercontent.com/gtrummell/gnas-portainer-templates/master/templates.json'"
+
+  plex:
+    container_name: plex
+    image: plexinc/pms-docker:latest
+    restart: on-failure
+    environment:
+      - PLEX_GID=65534
+      - PLEX_UID=65534
+      - TZ='America/Los Angeles'
+    labels:
+      - traefik.enable=false
+    network_mode: host
+    volumes:
+      - /opt/gnas/plex:/config
+      - /storage:/data
+      - /storage/Transcode:/transcode
+
+  radarr:
+    container_name: radarr
+    image: linuxserver/radarr:latest
+    restart: on-failure
+    environment:
+      - PGID=65534
+      - PUID=65534
+      - TZ='America/Los Angeles'
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.radarr.rule=Host(`radarr`, `radarr.freedomring.net`)
+      - traefik.http.services.radarr.loadbalancer.server.port=7878
+      - traefik.http.routers.radarr.entrypoints=http,https
+    ports:
+      - 7878:7878/tcp
+    volumes:
+      - /opt/gnas/radarr:/config
+      - /storage/Downloads/complete/movies:/downloads
+      - /storage/Movies:/movies
+
+  sabnzbd:
+    container_name: sabnzbd
+    image: linuxserver/sabnzbd:latest
+    restart: on-failure
+    environment:
+      - PGID=65534
+      - PUID=65534
+      - TZ='America/Los Angeles'
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.sabnzbd.rule=Host(`sabnzbd`, `sabnzbd.freedomring.net`)
+      - traefik.http.services.sabnzbd.loadbalancer.server.port=8080
+      - traefik.http.routers.sabnzbd.entrypoints=http,https
+    networks:
+      - default
+    ports:
+      - 8088:8080/tcp
+      - 8099:9090/tcp
+    volumes:
+      - /opt/gnas/sabnzbd:/config
+      - /storage/Downloads/complete:/downloads
+      - /storage/Downloads/incomplete/sabnzbd:/incomplete-downloads
+      - /storage/Downloads/watched/nzb:/watch
+
+  sonarr:
+    container_name: sonarr
+    image: linuxserver/sonarr:latest
+    restart: on-failure
+    environment:
+      - PGID=65534
+      - PUID=65534
+      - TZ='America/Los Angeles'
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.sonarr.rule=Host(`sonarr`, `sonarr.freedomring.net`)
+      - traefik.http.services.sonarr.loadbalancer.server.port=8989
+      - traefik.http.routers.sonarr.entrypoints=http,https
+    ports:
+      - 8989:8989/tcp
+    volumes:
+      - /opt/gnas/sonarr:/config
+      - /storage/Downloads/complete/tv:/downloads
+      - /storage/TV:/tv
+
+  transmission:
+    container_name: transmission
+    image: linuxserver/transmission:latest
+    restart: on-failure
+    environment:
+      - PUID=65534
+      - PGID=65534
+      - UMASK_SET=022
+      - TZ='America/Los Angeles'
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.transmission.rule=Host(`transmission`, `transmission.freedomring.net`)
+      - traefik.http.services.transmission.loadbalancer.server.port=8901
+      - traefik.http.routers.transmission.entrypoints=http,https
+    ports:
+      - 8901:8901
+      - 51413:51413/tcp
+      - 51413:51413/udp
+    volumes:
+      - /opt/gnas/transmission:/config
+      - /storage/Downloads/complete:/downloads
+      - /storage/Downloads/incomplete/transmission:/incomplete-downloads
+      - /storage/Downloads/watched/torrent:/watch
+      - /storage/Downloads/scripts:/scripts
+
+  traefik:
+    container_name: traefik
+    image: traefik:2.3
+    restart: on-failure
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.traefik.rule=Host(`traefik`, `traefik.freedomring.net`)
+      - traefik.http.services.traefik.loadbalancer.server.port=8181
+      - traefik.http.routers.traefik.entrypoints=http,https
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8181:8181"
+      - "9351:9351"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/gnas/traefik:/etc/traefik

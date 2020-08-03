@@ -60,14 +60,14 @@ inhibit_rules:
 
 
 receivers:
-  - name: 'ghome-admins'
+  - name: 'gnas-admins'
     pushover_configs:
-        # Whether or not to notify about resolved alerts.
+      # Whether or not to notify about resolved alerts.
       - send_resolved: true
         # The recipient user’s user key.
-        user_key: <pushover_user_key>
+        user_key: <user_pushover_key>
         # Your registered application’s API token, see https://pushover.net/apps
-        token: <pushover_app_token>
+        token: <user_pushover_key>
         # How often the Pushover servers will send the same notification to the user.
         # Must be at least 30 seconds.
         retry: 1m

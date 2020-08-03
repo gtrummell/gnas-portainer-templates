@@ -1,0 +1,155 @@
+# my global config
+global:
+  scrape_interval: 15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+  # scrape_timeout is set to the global default (10s).
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - prom:9093
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  - '/etc/prometheus/rules/*.yml'
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: 'node_exporter'
+    # Gathers metrics from *nix machines including GNAS and OPNSense or pfSense
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+    static_configs:
+      - targets: [
+        'gnas:9100',
+        'gfw:9100',
+      ]
+
+  - job_name: 'wmi_exporter'
+    # Gathers metrics from Windows machines such as a gaming machine or fileserver
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+    static_configs:
+      - targets: [
+        'gwin:9182'
+      ]
+
+  - job_name: 'prometheus'
+    # Gathers metrics from the Prometheus server (itself)
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+    static_configs:
+      - targets: [
+        'prom:9090'
+      ]
+
+  - job_name: 'pushgateway'
+    # Gathers metrics from the Prometheus Pushgateway (submitted metrics)
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+    static_configs:
+      - targets: [
+        'prom:9091'
+      ]
+
+  - job_name: 'alertmanager'
+    # Gathers metrics from the Prometheus Alertmanager
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'
+    static_configs:
+      - targets: [
+        'prom:9093'
+      ]
+
+  - job_name: 'cadvisor'
+    # Gathers metrics from Google Container Advisor (CAdvisor)
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+    static_configs:
+      - targets: [
+        'gnas:8080'
+      ]
+
+  - job_name: 'grafana'
+    # Gathers metrics from Grafana
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+    static_configs:
+      - targets: [
+        'grafana:3000'
+      ]
+
+  - job_name: 'smokeping'
+    # Gathers metrisc from the Smokeping Prober
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+    static_configs:
+      - targets: [
+        'gnas:9374'
+      ]
+
+  - job_name: 'media'
+    # Gathers metrics from all services on GNAS, including SabNZBD and Transmission
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+    static_configs:
+      - targets: [
+        'gnas:9387',
+        'gnas:19091'
+      ]
+
+  - job_name: 'traefik'
+    # Gathers metrics from the Traefik HTTP Ingress
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+    static_configs:
+      - targets: [
+        'gnas:9351'
+      ]
+
+  - job_name: 'blackbox_http'
+    # Gathers metrics from the Prometheus Black Box Exporter for HTTP performance
+    # scheme defaults to 'http'.
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+          - http://www.google.com
+          - http://www.microsoft.com
+          - https://aws.amazon.com
+          - https://twitter.com
+          - https://www.apple.com
+          - https://www.facebook.com
+          - https://www.robertsspaceindustries.com
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: gnas:9115
+
+  - job_name: 'blackbox_dns'
+    # Gathers metrics from the Prometheus Black Box Exporter for DNS performance
+    # scheme defaults to 'http'.
+    metrics_path: /probe
+    params:
+      module: [dns_rp_mx]
+    static_configs:
+      - targets:
+          - 192.168.151.1
+          - 8.8.4.4
+          - 8.8.8.8
+          - 1.1.1.1
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: gnas:9115

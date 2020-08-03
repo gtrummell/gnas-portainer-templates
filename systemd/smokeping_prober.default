@@ -1,3 +1,2 @@
-# /etc/defaults file for the Smokeping Prober Exporter
-
-HOSTS="192.168.1.1 google.com amazon.com yahoo.com"
+# Defaults file for the Smokeping Prober Exporter
+HOSTS="192.168.1.1 amazon.com apple.com facebook.com google.com microsoft.com robertsspaceindustries.com twitter.com"

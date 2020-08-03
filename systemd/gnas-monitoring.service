@@ -1,0 +1,16 @@
+[Unit]
+Description=GNAS Monitoring Services
+After=docker.service network.target
+
+[Service]
+Type=simple
+Restart=always
+User=root
+Environment="CONF=/etc/gnas-monitoring/docker-compose.yml"
+ExecStartPre=-/usr/bin/docker-compose -f $CONF pull --parallel
+ExecStartPre=-/usr/bin/docker-compose -f $CONF down
+ExecStart=/usr/bin/docker-compose -f $CONF up --no-color
+ExecStop=/usr/bin/docker-compose -f $CONF down
+
+[Install]
+WantedBy=multi-user.target

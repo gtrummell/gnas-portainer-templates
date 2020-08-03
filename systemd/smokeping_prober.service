@@ -1,15 +1,4 @@
 [Unit]
-Description=Node Exporter
-
-[Service]
-User=node_exporter
-EnvironmentFile=/etc/default/node_exporter
-ExecStart=/usr/sbin/node_exporter $OPTIONS
-
-[Install]
-WantedBy=multi-user.target
-root@gnas:/etc/systemd/system# cat smokeping_prober.service
-[Unit]
 Description=Smokeping Prober Service
 After=network.target
 
